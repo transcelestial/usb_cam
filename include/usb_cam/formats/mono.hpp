@@ -108,6 +108,41 @@ private:
   int m_number_of_pixels;
 };
 
+/// @brief Also known as MONO10P to MONO8
+class Y10P2MONO8 : public pixel_format_base
+{
+public:
+  explicit Y10P2MONO8(const format_arguments_t & args = format_arguments_t())
+  : pixel_format_base(
+      "y10P2mono8",
+      V4L2_PIX_FMT_Y10P,
+      usb_cam::constants::MONO8,
+      1,
+      8,
+      true),
+    m_number_of_pixels(args.pixels)
+  {}
+
+  /// @brief Convert a Y10 (MONO10) image to MONO8
+  /// @param src pointer to source Y10 (MONO10) image
+  /// @param dest pointer to destination MONO8 image
+  /// @param bytes_used number of bytes used by source image
+  void convert(const char * & src, char * & dest, const int & bytes_used) override
+  {
+    (void)bytes_used;  // not used by this conversion method
+    int j = 0;
+    for (int i = 0; i < m_number_of_pixels; i++) {
+      dest[i] = src[j++];
+      if (i % 4 == 3) {
+        j++;
+      }
+    }
+  }
+
+private:
+  int m_number_of_pixels;
+};
+
 }  // namespace formats
 }  // namespace usb_cam
 
