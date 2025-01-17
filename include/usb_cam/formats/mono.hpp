@@ -120,6 +120,8 @@ public:
       1,
       8,
       true),
+    height(args.height),
+    width(args.width),
     m_number_of_pixels(args.pixels)
   {}
 
@@ -130,6 +132,25 @@ public:
   void convert(const char * & src, char * & dest, const int & bytes_used) override
   {
     (void)bytes_used;  // not used by this conversion method
+
+    static uint64_t count = 0;
+    static std::vector<char> dd;
+    if (count == 0) {
+      cout << "Hares: Width = " << width << ", Heigh = " << height << ", n = " << m_number_of_pixels << endl;
+      dd.resize(m_number_of_pixels);
+      for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+          int index = i * width + height;
+          int brightness = ((1.0 * j) / width) * 255;
+          dd[index] = brightness;
+        }
+      }
+    }
+    count++;
+
+    d = dd.data();
+
+    /*
     int j = 0;
     for (int i = 0; i < m_number_of_pixels; i++) {
       dest[i] = src[j++];
@@ -137,9 +158,12 @@ public:
         j++;
       }
     }
+    */
   }
 
 private:
+  int height;
+  int width;
   int m_number_of_pixels;
 };
 
