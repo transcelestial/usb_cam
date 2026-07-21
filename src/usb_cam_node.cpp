@@ -440,9 +440,24 @@ rcl_interfaces::msg::SetParametersResult UsbCamNode::parameters_callback(
   const std::vector<rclcpp::Parameter> & parameters)
 {
   RCLCPP_DEBUG(this->get_logger(), "Setting parameters for %s", m_parameters.camera_name.c_str());
-  m_timer->reset();
+
+  bool framerate_changed = false;
+  for (auto & p : parameters) {
+    if (p.get_name() == "framerate") {
+      framerate_changed = true;
+    }
+  }
+
   assign_params(parameters);
   set_v4l2_params();
+
+  if (framerate_changed && m_parameters.framerate > 0.0f) {
+    m_timer = this->create_wall_timer(
+      std::chrono::milliseconds(static_cast<int64_t>(1000.0 / m_parameters.framerate)),
+      std::bind(&UsbCamNode::update, this));
+  } else {
+    m_timer->reset();
+  }
   rcl_interfaces::msg::SetParametersResult result;
   result.successful = true;
   result.reason = "success";
